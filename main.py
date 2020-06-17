@@ -19,15 +19,34 @@ class MonzoClient:
         self._balances = []
 
 
+    def check_auth(self):
+        ''' Check if authentication has already been completed by reviewing auth variables in config and testing an API call '''
+        
+        config_vars = [
+            oauth2.config.MONZO_ACCESS_TOKEN,
+            oauth2.config.MONZO_REFRESH_TOKEN,
+            oauth2.config.MONZO_USER_ID
+        ]
+
+        if None not in config_vars:
+            print("Access and refresh tokens exist, testing API call...")
+            response = self._api_client.test_api_call()
+            # here it needs to refresh tokens if test fails and test api call agaiin
+            self._api_client_ready = True
+        else:
+            print("Authentication is needed to set config variables")
+            self.do_auth()
+
+
     def do_auth(self):
-        ''' Perform OAuth2 flow mostly on command line and retreive information of the authorised user's current account information, rather than from a joint account if present. Also waits for the user to confirm access to their data in their Monzo app -- this is required for the client to be compliant with Strong Customer Authentication and be able to access user data. '''
+        ''' Perform OAuth2 flow mostly on command line. Waits for the user to confirm access to their data in their Monzo app -- this is required for the client to be compliant with Strong Customer Authentication and be able to access user data. '''
 
         print('Starting OAuth2 flow...')
         self._api_client.start_auth()
 
         print('OAuth2 flow completed, testing API call...')
         response = self._api_client.test_api_call()
-        # I think the next 4 lines can be removed as they are covered in the oauth2.test_api_call function. TODO: test removal later on
+        # TODO: re-thing this test api success / response logic after removing the functions own process
         if 'authenticated' in response:
             print('API call test successful')
         else:
@@ -36,6 +55,11 @@ class MonzoClient:
 
         print('Please open your Monzo app, client \"Allow access to your data\" and follow the instructions.')
         input('Once approved, press [Enter] to continue:')
+
+
+
+    def get_account(self):
+        ''' Retreive information of the authorised user's current account information, rather than from a joint account if present. This will be changed to store joint details too in future'''
 
         print('Retrieving account information...')
         success, response = self._api_client.api_get('accounts',{})
@@ -51,24 +75,7 @@ class MonzoClient:
         
         if self._account_id is None:
             error('Count not find a personal account')
-
-
-    def check_auth(self):
-        ''' Check if authentication has already been completed by reviewing auth variables in config and testing an API call '''
-        
-        config_vars = [
-            oauth2.config.MONZO_ACCESS_TOKEN,
-            oauth2.config.MONZO_REFRESH_TOKEN,
-            oauth2.config.MONZO_USER_ID
-        ]
-
-        if None not in config_vars:
-            print('Access and refresh tokens exist, testing API call...')
-            response = self._api_client.test_api_call()
-            self._api_client_ready = True
-        else:
-            return "Authentication is needed to set config variables"
-
+            
 
     def list_balances(self):
         ''' An example call to the end point documented in https://docs.monzo.com/#balance'''
@@ -86,9 +93,7 @@ class MonzoClient:
 
 if __name__ == '__main__':
     monzo =  MonzoClient()
-    monzo.do_auth()
+    monzo.check_auth()
+    monzo.get_account()
     monzo.list_balances()
     print(monzo.balances)
-
-    # print(monzo.check_auth())
-    

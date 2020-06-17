@@ -210,6 +210,7 @@ class OAuth2Client:
 
         success, response = self.api_get("ping/whoami", {})
         if not success:
+            # TODO: i dont want the system to end here, i might want it to refresh token. i could just return the success and response vars and remove all logic from this section
             try:
                 error("API test call failed, bad status code returned: {} ({})".format(response.status_code,
                     response))
