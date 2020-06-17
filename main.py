@@ -28,14 +28,25 @@ class MonzoClient:
             oauth2.config.MONZO_USER_ID
         ]
 
-        if None not in config_vars:
-            print("Access and refresh tokens exist, testing API call...")
-            response = self._api_client.test_api_call()
-            # here it needs to refresh tokens if test fails and test api call agaiin
-            self._api_client_ready = True
-        else:
+        if None in config_vars:
             print("Authentication is needed to set config variables")
             self.do_auth()
+        else:
+            print("Access and refresh tokens exist, testing API call...")
+            success, response = self._api_client.test_api_call()
+            # here it needs to refresh tokens if test fails and test api call agaiin
+            if not success:
+                self._api_client.refresh_access_token()
+                success, response = self._api_client.test_api_call()
+                if not success:
+                    try:
+                        error("API test call failed after refresh, bad status code returned: {} ({})".format(response.status_code,
+                            response))
+                    except:
+                        error("API test call failed after refresh, no status code returned")
+        
+            print("API test call successful.")
+            self._api_client_ready = True
 
 
     def do_auth(self):
@@ -45,12 +56,15 @@ class MonzoClient:
         self._api_client.start_auth()
 
         print('OAuth2 flow completed, testing API call...')
-        response = self._api_client.test_api_call()
-        # TODO: re-thing this test api success / response logic after removing the functions own process
-        if 'authenticated' in response:
-            print('API call test successful')
-        else:
-            error('OAuth2 flow seems to have failed.')
+        success, response = self._api_client.test_api_call()
+        if not success:
+            try:
+                error("API test call failed on initial auth, bad status code returned: {} ({})".format(response.status_code,
+                    response))
+            except:
+                error("API test call failed on initial auth, no status code returned")
+        
+        print("API test call successful.")
         self._api_client_ready = True
 
         print('Please open your Monzo app, client \"Allow access to your data\" and follow the instructions.')

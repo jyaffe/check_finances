@@ -9,6 +9,7 @@ import json
 import requests
 
 from utils import error
+from utils import refresh_config
 
 # A very simple OAuth2 client for the Monzo Third Party API. You presently cannot use
 # this API for public applications, as only a small amount of users you nominate can
@@ -38,7 +39,9 @@ class OAuth2Client:
         # browser from cross site forgery attacks. While we don't need it as a 
         # command-line application, we still send a randomised state nevertheless 
         # to demonstrate.
-        self._access_token = "test" # TODO: delete after testing
+        self._access_token = config.MONZO_ACCESS_TOKEN
+        self._refresh_token = config.MONZO_REFRESH_TOKEN
+        self._user_id = config.MONZO_USER_ID
         
     
     def start_auth(self):
@@ -73,7 +76,7 @@ class OAuth2Client:
         if callback_qs["state"].strip() != self._oauth_state:
             error("invalid randomised auth state in callback URL, did you use the most recent login link?")
         
-        self._auth_code = callback_qs["code"].strip() # TODO: write to config? maybe not, as it is temporary. we want access and refresh from next funct
+        self._auth_code = callback_qs["code"].strip()
         self.exchange_auth_code()
     
     
@@ -95,15 +98,14 @@ class OAuth2Client:
         if response.status_code != 200:
             error("Auth failed, bad status code returned: {} ({})".format(response.status_code,
                 response.text))
-            # TODO: maybe build in some code refresh loop here. no i think not anymore.
 
         response_object = response.json()
         if "access_token" in response_object:
             print("Auth successful, access token received.") 
-            self._access_token = response_object["access_token"] # TODO: store this
+            self._access_token = response_object["access_token"]
 
             if "refresh_token" in response_object:
-                self._refresh_token = response_object["refresh_token"] # TODO: store this
+                self._refresh_token = response_object["refresh_token"]
             else:
                 self._is_confidential_client = False
                 if config.MONZO_CLIENT_IS_CONFIDENTIAL:
@@ -111,7 +113,9 @@ class OAuth2Client:
     
             if "user_id" not in response_object:
                 error("Could not retrieve user_id from token exchange response: {}", response_object)
-            self._user_id = response_object["user_id"] # TODO: store this
+            self._user_id = response_object["user_id"]
+
+        refresh_config(self._access_token,self._refresh_token,self._user_id)
 
 
     def refresh_access_token(self):
@@ -135,14 +139,16 @@ class OAuth2Client:
         
         response_object = response.json()
         if "access_token" in response_object:
-            self._access_token = response_object["access_token"] # TODO: store this
+            self._access_token = response_object["access_token"]
         else:
             error("No access token returned in token refresh response")
         if "refresh_token" in response_object:
-            self._refresh_token = response_object["refresh_token"] # TODO: store this
+            self._refresh_token = response_object["refresh_token"]
         else:
             error("No refresh token returned in token refresh response")
         print("Token refreshed, new access token and refresh token recorded.")
+
+        refresh_config(self._access_token,self._refresh_token,self._user_id)
     
 
     def api_get(self, path, params_data):
@@ -209,16 +215,7 @@ class OAuth2Client:
         ''' Sends a GET ping API call to the Monzo API to test the auth state. '''
 
         success, response = self.api_get("ping/whoami", {})
-        if not success:
-            # TODO: i dont want the system to end here, i might want it to refresh token. i could just return the success and response vars and remove all logic from this section
-            try:
-                error("API test call failed, bad status code returned: {} ({})".format(response.status_code,
-                    response))
-            except:
-                error("API test call failed, no status code returned")
-        
-        print("API test call successful.")
-        return response
+        return success, response
 
 
 if __name__ == "__main__":
