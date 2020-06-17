@@ -95,7 +95,7 @@ class OAuth2Client:
         if response.status_code != 200:
             error("Auth failed, bad status code returned: {} ({})".format(response.status_code,
                 response.text))
-            # TODO: maybe build in some code refresh loop here
+            # TODO: maybe build in some code refresh loop here. no i think not anymore.
 
         response_object = response.json()
         if "access_token" in response_object:

@@ -96,4 +96,4 @@ if __name__ == '__main__':
     monzo.check_auth()
     monzo.get_account()
     monzo.list_balances()
-    print(monzo.balances)
+    print(monzo._balances)
