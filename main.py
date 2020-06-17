@@ -34,7 +34,6 @@ class MonzoClient:
         else:
             print("Access and refresh tokens exist, testing API call...")
             success, response = self._api_client.test_api_call()
-            # here it needs to refresh tokens if test fails and test api call agaiin
             if not success:
                 self._api_client.refresh_access_token()
                 success, response = self._api_client.test_api_call()
@@ -104,6 +103,7 @@ class MonzoClient:
 
         self._balances = response['balance']
         print('Balance loaded.')
+
 
 if __name__ == '__main__':
     monzo =  MonzoClient()
