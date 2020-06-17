@@ -35,6 +35,7 @@ class MonzoClient:
             print("Access and refresh tokens exist, testing API call...")
             success, response = self._api_client.test_api_call()
             if not success:
+                print("API test call failed, refreshing access token...")
                 self._api_client.refresh_access_token()
                 success, response = self._api_client.test_api_call()
                 if not success:
