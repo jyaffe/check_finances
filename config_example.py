@@ -15,3 +15,8 @@ MONZO_OAUTH_REDIRECT_URI = "http://127.0.0.1:21234/" # For receiving the auth co
 MONZO_CLIENT_IS_CONFIDENTIAL = True 
 # If your application runs on a backend server with client secret hidden from user, it should be registered 
 # as confidential and will have the ability to refresh access tokens.
+
+# The following variables are set by the oauth2.py script and default as None
+MONZO_ACCESS_TOKEN = None
+MONZO_REFRESH_TOKEN = None
+MONZO_USER_ID = None

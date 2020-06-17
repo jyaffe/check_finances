@@ -38,6 +38,7 @@ class OAuth2Client:
         # browser from cross site forgery attacks. While we don't need it as a 
         # command-line application, we still send a randomised state nevertheless 
         # to demonstrate.
+        self._access_token = "test" # TODO: delete after testing
         
     
     def start_auth(self):
@@ -72,7 +73,7 @@ class OAuth2Client:
         if callback_qs["state"].strip() != self._oauth_state:
             error("invalid randomised auth state in callback URL, did you use the most recent login link?")
         
-        self._auth_code = callback_qs["code"].strip()
+        self._auth_code = callback_qs["code"].strip() # TODO: write to config? maybe not, as it is temporary. we want access and refresh from next funct
         self.exchange_auth_code()
     
     
@@ -94,14 +95,15 @@ class OAuth2Client:
         if response.status_code != 200:
             error("Auth failed, bad status code returned: {} ({})".format(response.status_code,
                 response.text))
+            # TODO: maybe build in some code refresh loop here
 
         response_object = response.json()
         if "access_token" in response_object:
             print("Auth successful, access token received.") 
-            self._access_token = response_object["access_token"]
+            self._access_token = response_object["access_token"] # TODO: store this
 
             if "refresh_token" in response_object:
-                self._refresh_token = response_object["refresh_token"]
+                self._refresh_token = response_object["refresh_token"] # TODO: store this
             else:
                 self._is_confidential_client = False
                 if config.MONZO_CLIENT_IS_CONFIDENTIAL:
@@ -109,7 +111,7 @@ class OAuth2Client:
     
             if "user_id" not in response_object:
                 error("Could not retrieve user_id from token exchange response: {}", response_object)
-            self._user_id = response_object["user_id"]
+            self._user_id = response_object["user_id"] # TODO: store this
 
 
     def refresh_access_token(self):
@@ -133,11 +135,11 @@ class OAuth2Client:
         
         response_object = response.json()
         if "access_token" in response_object:
-            self._access_token = response_object["access_token"]
+            self._access_token = response_object["access_token"] # TODO: store this
         else:
             error("No access token returned in token refresh response")
         if "refresh_token" in response_object:
-            self._refresh_token = response_object["refresh_token"]
+            self._refresh_token = response_object["refresh_token"] # TODO: store this
         else:
             error("No refresh token returned in token refresh response")
         print("Token refreshed, new access token and refresh token recorded.")
@@ -208,8 +210,11 @@ class OAuth2Client:
 
         success, response = self.api_get("ping/whoami", {})
         if not success:
-            error("API test call failed, bad status code returned: {} ({})".format(response.status_code,
-                response))
+            try:
+                error("API test call failed, bad status code returned: {} ({})".format(response.status_code,
+                    response))
+            except:
+                error("API test call failed, no status code returned")
         
         print("API test call successful.")
         return response

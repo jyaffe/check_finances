@@ -16,7 +16,7 @@ class MonzoClient:
         self._api_client = oauth2.OAuth2Client()
         self._api_client_ready = False
         self._account_id = None
-        self. balances = []
+        self._balances = []
 
 
     def do_auth(self):
@@ -27,6 +27,7 @@ class MonzoClient:
 
         print('OAuth2 flow completed, testing API call...')
         response = self._api_client.test_api_call()
+        # I think the next 4 lines can be removed as they are covered in the oauth2.test_api_call function. TODO: test removal later on
         if 'authenticated' in response:
             print('API call test successful')
         else:
@@ -51,6 +52,24 @@ class MonzoClient:
         if self._account_id is None:
             error('Count not find a personal account')
 
+
+    def check_auth(self):
+        ''' Check if authentication has already been completed by reviewing auth variables in config and testing an API call '''
+        
+        config_vars = [
+            oauth2.config.MONZO_ACCESS_TOKEN,
+            oauth2.config.MONZO_REFRESH_TOKEN,
+            oauth2.config.MONZO_USER_ID
+        ]
+
+        if None not in config_vars:
+            print('Access and refresh tokens exist, testing API call...')
+            response = self._api_client.test_api_call()
+            self._api_client_ready = True
+        else:
+            return "Authentication is needed to set config variables"
+
+
     def list_balances(self):
         ''' An example call to the end point documented in https://docs.monzo.com/#balance'''
 
@@ -62,7 +81,7 @@ class MonzoClient:
         if not success or 'balance' not in response:
             error('Could not get balance ({})'.format(response))
 
-        self.balances = response['balance']
+        self._balances = response['balance']
         print('Balance loaded.')
 
 if __name__ == '__main__':
@@ -70,3 +89,6 @@ if __name__ == '__main__':
     monzo.do_auth()
     monzo.list_balances()
     print(monzo.balances)
+
+    # print(monzo.check_auth())
+    
