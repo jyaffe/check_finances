@@ -49,6 +49,6 @@ The client should print out a list of your personal and joint account balances, 
 
 As your account authentication details are stored locally with the ability to refresh the tokens, the script includes a function to log out of your account and reset the config file to make sure that any future access requires the strong authentication process of going through the developer site and approving on the Monzo app. This function is included in the script initially but can be excluded by deleting or commenting out the line at the end of `main.py` as so: `# client.log_out()`
 
-You should keep the log out function if you are working on a shared device or do not want to leave access to your account open for a period of time as the details can be used to initiate transactions.
+You should keep the log out function if you are working on a shared device or do not want to leave access to your account open for a period of time as the details can be used to access the full set of Monzo APIs.
 
 If you choose to remove the log out function, the main access code will expire after a period of time, but the refresh code will allow you to obtain a new one without going through the strong authentication process. 
