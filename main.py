@@ -94,7 +94,7 @@ class MonzoClient:
             error('Count not find a personal account')
         
         if self._joint_account_id is None:
-            error('Count not find a joint account')
+            print('Count not find a joint account')
             
 
     def list_balances(self,account):
