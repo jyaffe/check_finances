@@ -145,3 +145,5 @@ if __name__ == '__main__':
     monzo.append_balances(monzo.accounts)
     for account in monzo.accounts:
         account.show_balances()
+    # comment out the next line to prevent a hard log out.
+    monzo._api_client.log_out()

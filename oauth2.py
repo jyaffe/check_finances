@@ -10,6 +10,7 @@ import requests
 
 from utils import error
 from utils import refresh_config
+from utils import reset_config
 
 # A very simple OAuth2 client for the Monzo Third Party API. You presently cannot use
 # this API for public applications, as only a small amount of users you nominate can
@@ -216,6 +217,20 @@ class OAuth2Client:
 
         success, response = self.api_get("ping/whoami", {})
         return success, response
+
+    def log_out(self):
+        ''' Sends a post API call to force a hard log out of the client and resets the config file. '''
+
+        success, response = self.api_post("oauth2/logout",{})
+        reset_config()
+
+        if success:
+            print('Successfully logged out.')
+        else:
+            success, response = self.test_api_call()
+            if success:
+                print('Logout failed.')
+
 
 
 if __name__ == "__main__":
