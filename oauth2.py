@@ -66,15 +66,15 @@ class OAuth2Client:
         try:
             callback = urllib.urlparse(callback_url).query
         except:
-            error("cannot parse callback URL, try again.")
+            error("Cannot parse callback URL, try again.")
 
         callback_qs = dict(urllib.parse_qsl(callback))
         if "code" not in callback_qs:
-            error("cannot find temporary auth code in callback URL")
+            error("Cannot find temporary auth code in callback URL.")
         if "state" not in callback_qs:
-            error("cannot find randomised auth state in callback URL")
+            error("Cannot find randomised auth state in callback URL.")
         if callback_qs["state"].strip() != self._oauth_state:
-            error("invalid randomised auth state in callback URL, did you use the most recent login link?")
+            error("Invalid randomised auth state in callback URL, did you use the most recent login link?")
         
         self._auth_code = callback_qs["code"].strip()
         self.exchange_auth_code()
@@ -84,7 +84,7 @@ class OAuth2Client:
         '''Exchanges the temporary authorization code with an access token for the application. '''
         
         if self._auth_code == "":
-            error("no auth code, have you completed intial auth flow")
+            error("No auth code, have you completed intial auth flow.")
 
         oauth2_POST_params = {
             "grant_type": config.MONZO_AUTH_GRANT_TYPE,
@@ -96,7 +96,7 @@ class OAuth2Client:
         request_url = "https://{}/oauth2/token?".format(config.MONZO_API_HOSTNAME)
         response = requests.post(request_url, data=oauth2_POST_params)
         if response.status_code != 200:
-            error("Auth failed, bad status code returned: {} ({})".format(response.status_code,
+            error("Auth failed, bad status code returned: {} ({}).".format(response.status_code,
                 response.text))
 
         response_object = response.json()
@@ -109,10 +109,10 @@ class OAuth2Client:
             else:
                 self._is_confidential_client = False
                 if config.MONZO_CLIENT_IS_CONFIDENTIAL:
-                    print("Warning: this client is not registered as confidential, we will not be able to refresh token")
+                    print("Warning: this client is not registered as confidential, we will not be able to refresh token.")
     
             if "user_id" not in response_object:
-                error("Could not retrieve user_id from token exchange response: {}", response_object)
+                error("Could not retrieve user_id from token exchange response: {}.", response_object)
             self._user_id = response_object["user_id"]
 
         refresh_config(self._access_token,self._refresh_token,self._user_id)
@@ -134,18 +134,18 @@ class OAuth2Client:
         request_url = "https://{}/oauth2/token?".format(config.MONZO_API_HOSTNAME)
         response = requests.post(request_url, data=oauth2_POST_params)
         if response.status_code != 200:
-            error("Token refreshed failed, bad status code returned: {} ({})".format(response.status_code,
+            error("Token refreshed failed, bad status code returned: {} ({}).".format(response.status_code,
                 response.text))
         
         response_object = response.json()
         if "access_token" in response_object:
             self._access_token = response_object["access_token"]
         else:
-            error("No access token returned in token refresh response")
+            error("No access token returned in token refresh response.")
         if "refresh_token" in response_object:
             self._refresh_token = response_object["refresh_token"]
         else:
-            error("No refresh token returned in token refresh response")
+            error("No refresh token returned in token refresh response.")
         print("Token refreshed, new access token and refresh token recorded.")
 
         refresh_config(self._access_token,self._refresh_token,self._user_id)

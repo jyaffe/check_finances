@@ -13,7 +13,7 @@ def error(message):
 def refresh_config(access_token,refresh_token,user_id):
     ''' Take the access token, refresh token and re-write them into the config file for future auth requests. ''' 
 
-    print('Storing authentication details to config')
+    print('Storing authentication details to config.')
 
     # get the absolute directory path of this file and append config.py to get direct file path for config
     util_dir_path = os.path.dirname(__file__)
@@ -38,4 +38,4 @@ def refresh_config(access_token,refresh_token,user_id):
     os.remove(source_file_path)
     move(target_file_path,source_file_path)
 
-    print('Authentication details stored to config')
+    print('Authentication details stored to config.')

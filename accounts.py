@@ -9,14 +9,14 @@ class Account:
 
         if 'type' in account and account['type'] == 'uk_retail':
             self.type = 'personal'
-            print('Retreived personal account information')
+            print('Retreived personal account information.')
         elif 'type' in account and account['type'] == 'uk_retail_joint':
             self.type = 'joint'
-            print('Retreived joint account information')
+            print('Retreived joint account information.')
         else:
-            error('Account type not recognised')
+            error('Account type not recognised.')
     
-    def add_main_balance(self,response):
+    def add_main_balances(self,response):
         self.main_balance = response['balance']/100
         self.total_balance = response['total_balance']/100
 
@@ -26,8 +26,15 @@ class Account:
         for pot in response['pots']:
             self.pots.append(Pot(pot))
 
+    def show_balances(self):
+        print('')
+        print(self, self.main_balance)
+        for pot in self.pots:
+            if pot.deleted == False:
+                print(pot.name, pot.balance)
+
     def __repr__(self):
-        return '{} {}'.format(self.description,self.type)
+        return '{} account'.format(self.type.capitalize())
         
 
 class Pot:
