@@ -41,6 +41,8 @@ pip install -r requirements.txt
 
 Your client should now be ready to use. To see a quick demo of this example client, simply run the `main.py` script and follow the authentication flow as prompted.
 
+When the script asks you for the callback link, it is looking for the link that Monzo ask you to visit in the email they send to you after providing your address to the developer site.
+
 The client should print out a list of your personal and joint account balances, including those of any live pots. 
 
 ## Please Note

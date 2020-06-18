@@ -62,7 +62,7 @@ class OAuth2Client:
     def wait_for_auth_flow(self):
         ''' Parses the temporary authorization code returned from authenticating with Email login link. '''
         
-        callback_url = input("Once you have obtained the callback link by clicking the login button in your email, paste your callback URL here: ").strip()
+        callback_url = input("Once you have obtained the callback link by right-clicking the login button in your email and copying the link, paste your callback URL here: ").strip()
         try:
             callback = urllib.urlparse(callback_url).query
         except:
