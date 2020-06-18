@@ -1,7 +1,4 @@
-.env
 .vscode
-.ipynb_checkpoints
 .DS_Store
-jupyter_notebooks
 config.py
 __pycache__
